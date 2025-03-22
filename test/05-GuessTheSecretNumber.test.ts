@@ -24,9 +24,8 @@ describe('GuessTheSecretNumberChallenge', () => {
   });
 
   it('exploit', async () => {
-    /**
-     * YOUR CODE HERE
-     * */
+    const tx = await target.guess(170, { value: ethers.utils.parseEther("1") }); 
+    await tx.wait(); 
 
     expect(await target.isComplete()).to.equal(true);
   });
