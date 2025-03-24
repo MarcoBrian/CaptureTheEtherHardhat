@@ -44,21 +44,15 @@ describe('PredictTheFutureChallenge', () => {
     // Mine one additional block so that the next block is bigger than settlement block
     await provider.send('evm_mine', []);
 
-    // Define a maximum iteration to avoid infinite loops (safety mechanism)
-    const MAX_ITERATIONS = 100;
-    let iterationCount = 0;
 
     // Loop until the contract is complete
-    while (!(await target.isComplete()) && iterationCount < MAX_ITERATIONS) {
+    while (!(await target.isComplete())) {
       try {
         const attackTx = await attackContract.connect(attacker).attack();
         await attackTx.wait();
       } catch (err) {
         console.log(err);
       }
-
-      // Increment the iteration count
-      iterationCount++;
 
     }
 
