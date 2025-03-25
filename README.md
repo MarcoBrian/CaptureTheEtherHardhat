@@ -134,3 +134,10 @@ This way you don't need to spend ether on every guess, you can choose to call  `
 To break the challenge we can input 0 value as the hash guess value. During testing it is possible to simulate more than 256 blocks mined and after calling `settle()` function the test will pass successfully.
 
 
+
+### Math
+
+#### Token Sale
+In this challenge , you will need to make use of overflow attack in order to solve the challenge. 
+
+The goal is to find the`numTokens` required to make the `total` value overflow. The overflow value will restart the amount of `msg.value` required and you can get many tokens at cheaper price. 
