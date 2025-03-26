@@ -141,3 +141,44 @@ To break the challenge we can input 0 value as the hash guess value. During test
 In this challenge , you will need to make use of overflow attack in order to solve the challenge. 
 
 The goal is to find the`numTokens` required to make the `total` value overflow. The overflow value will restart the amount of `msg.value` required and you can get many tokens at cheaper price. 
+
+
+#### Token Whale
+In this challenge, there are 2 key vulnerabilities that will allow the contract to be exploited.
+
+1. The first vulnerability is the potential underflow in `_transfer()`  function
+2. Second vulnerability is that the `transferFrom()` function is sending token from `msg.sender` instead of from `from` address because it calls `_transfer()` function
+
+Vulnerability 1 
+```solidity
+function _transfer(address to, uint256 value) internal {
+
+unchecked {
+	balanceOf[msg.sender] -= value; // This line is vulnerable to underflow attack
+	balanceOf[to] += value;
+}
+```
+
+Vulnerability 2
+```solidity
+function transferFrom(address from, address to, uint256 value) public {
+
+	require(balanceOf[from] >= value);
+	require(balanceOf[to] + value >= balanceOf[to]);
+	require(allowance[from][msg.sender] >= value);
+	allowance[from][msg.sender] -= value;
+	
+	_transfer(to, value); // This is the vulnerable part
+}
+```
+
+The overall idea here is that we need to make a contract balance underflow and therefore have the max number of tokens, and afterwards be able to send these tokens back to the original player. 
+
+Therefore to complete the challenge the steps are as of the following: 
+1. Create another exploit contract  -> let's call this *Contract E*
+2. From the initial `player`  , call the `approve()` with the first argument as Contract E's Address, and second argument as some arbitrary amount of tokens say `100` tokens . 
+3. Step 2 will allow the exploit contract (Contract E) to transfer some balance from the `player` to any address. 
+4. In the exploit contract, perform this call `tokenWhale.transferFrom(player, player, 10);` 
+5. By doing this the `transferFrom()` function will check that the contract E is approved to send tokens from `player`. But the transfer will actually come from the contract E (since the `balance` is taken from `msg.sender`)
+6. Since `balance[msg.sender]` is `0` , performing a transfer will underflow and cause  `balance[msg.sender]` to have `type(uint256).max` value 
+7. Then we can transfer some tokens from the contract E back to the `player` and complete the challenge.
