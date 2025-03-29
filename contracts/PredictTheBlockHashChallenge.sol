@@ -1,12 +1,17 @@
-pragma solidity ^0.4.21;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
 
+//Challenge
 contract PredictTheBlockHashChallenge {
     address guesser;
     bytes32 guess;
     uint256 settlementBlockNumber;
 
-    function PredictTheBlockHashChallenge() public payable {
-        require(msg.value == 1 ether);
+    constructor() payable {
+        require(
+            msg.value == 1 ether,
+            "Requires 1 ether to create this contract"
+        );
     }
 
     function isComplete() public view returns (bool) {
@@ -14,8 +19,8 @@ contract PredictTheBlockHashChallenge {
     }
 
     function lockInGuess(bytes32 hash) public payable {
-        require(guesser == 0);
-        require(msg.value == 1 ether);
+        require(guesser == address(0), "Requires guesser to be zero address");
+        require(msg.value == 1 ether, "Requires msg.value to be 1 ether");
 
         guesser = msg.sender;
         guess = hash;
@@ -23,14 +28,18 @@ contract PredictTheBlockHashChallenge {
     }
 
     function settle() public {
-        require(msg.sender == guesser);
-        require(block.number > settlementBlockNumber);
+        require(msg.sender == guesser, "Requires msg.sender to be guesser");
+        require(
+            block.number > settlementBlockNumber,
+            "Requires block.number to be more than settlementBlockNumber"
+        );
 
-        bytes32 answer = block.blockhash(settlementBlockNumber);
+        bytes32 answer = blockhash(settlementBlockNumber);
 
-        guesser = 0;
+        guesser = address(0);
         if (guess == answer) {
-            msg.sender.transfer(2 ether);
+            (bool ok, ) = msg.sender.call{value: 2 ether}("");
+            require(ok, "Transfer to msg.sender failed");
         }
     }
 }

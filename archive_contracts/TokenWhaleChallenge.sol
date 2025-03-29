@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.4.21;
 
 contract TokenWhaleChallenge {
     address player;
@@ -12,9 +11,7 @@ contract TokenWhaleChallenge {
     string public symbol = "SET";
     uint8 public decimals = 18;
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    constructor(address _player) {
+    function TokenWhaleChallenge(address _player) public {
         player = _player;
         totalSupply = 1000;
         balanceOf[player] = 1000;
@@ -24,11 +21,11 @@ contract TokenWhaleChallenge {
         return balanceOf[player] >= 1000000;
     }
 
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
     function _transfer(address to, uint256 value) internal {
-        unchecked {
-            balanceOf[msg.sender] -= value;
-            balanceOf[to] += value;
-        }
+        balanceOf[msg.sender] -= value;
+        balanceOf[to] += value;
 
         emit Transfer(msg.sender, to, value);
     }
@@ -40,11 +37,7 @@ contract TokenWhaleChallenge {
         _transfer(to, value);
     }
 
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 
     function approve(address spender, uint256 value) public {
         allowance[msg.sender][spender] = value;

